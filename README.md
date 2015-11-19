@@ -1,4 +1,6 @@
-# Aclize
+# Aclize #
+
+[![Build Status](https://travis-ci.org/serioja90/aclize.svg)](https://travis-ci.org/serioja90/aclize)
 
 __Aclize__ is a Ruby gem that allows you to easily define an ACL (Access Controll List) to controllers and paths of your Ruby on Rails application.
 
