@@ -1,5 +1,7 @@
 require "aclize/version"
 require "aclize/helper"
+require "i18n"
+require "action_controller"
 
 module Aclize
 
