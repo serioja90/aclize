@@ -5,6 +5,30 @@ require "action_controller"
 
 module Aclize
 
+  def self.included(base)
+    base.extend ClassMethods
+    base.send :prepend, Initializer
+  end
+
+
+  # The ClassMethods module will implement the methods that we want to be accessible as
+  # class methods. This will permit to setup callbacks to execute on unauthorized access.
+  module ClassMethods
+    def aclized?
+      true
+    end
+
+    def if_unauthorized(&block)
+      if block_given?
+        before_filter do
+          register_callback(&block)
+        end
+      end
+    end
+  end
+
+
+  # The Initializer module will be used to initialize instance variables and to setup defaults.
   module Initializer
     def initialize
       @_aclize_acl = {controllers: {}, paths: {} }.nested_under_indifferent_access
@@ -12,6 +36,15 @@ module Aclize
     end
   end
 
+  protected
+
+  # Returns the ACL definition as a Hash
+  def get_acl_definition
+    return @_aclize_acl
+  end
+
+  # Defines the structure of ACL for the current user
+  # TODO: implement a better or an alternative way for ACL definition
   def define_acl(acl)
     raise "Invalid ACL definition type: (expected: Hash, got: #{acl.class})" unless acl.is_a? Hash
 
@@ -24,6 +57,9 @@ module Aclize
     end
   end
 
+
+  # In no callbacks were defined for unauthorized access, Aclize will render a
+  # default 403 Forbidden page. Otherwise, the control will be passed to the callback.
   def unauthorize!
     path = request.path_info
     flash.now[:alert] = I18n.t("aclize.unauthorized", path: path)
@@ -39,23 +75,7 @@ module Aclize
   end
 
 
-  def self.included(base)
-    base.extend ClassMethods
-    base.send :prepend, Initializer
-  end
-
-  module ClassMethods
-    def if_unauthorized(&block)
-      if block_given?
-        before_filter do
-          register_callback(&block)
-        end
-      end
-    end
-  end
-
-  protected
-
+  # Check if the current user have enough permissions to access the current controller/path
   def filter_access!
     unauthorize! if acl_action_denied? || acl_path_denied? || !(acl_action_allowed? || acl_path_allowed?)
   end
@@ -85,7 +105,7 @@ module Aclize
     denied = false
 
     paths.each do |path|
-      denied ||= !request.path_info.match(Regexp.new(path)).nil?
+      denied ||= !request.path_info.match(Regexp.new("^#{path}$")).nil?
       break if denied
     end
 
@@ -99,7 +119,7 @@ module Aclize
     allowed = false
 
     paths.each do |path|
-      allowed ||= !request.path_info.match(Regexp.new(path)).nil?
+      allowed ||= !request.path_info.match(Regexp.new("^#{path}$")).nil?
       break if allowed
     end
 
