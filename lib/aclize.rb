@@ -1,13 +1,30 @@
 require "aclize/version"
+require "aclize/helper"
 
 module Aclize
+
+  module Initializer
+    def initialize
+      @_aclize_acl = {controllers: {}, paths: {} }.nested_under_indifferent_access
+      super
+    end
+  end
+
   def define_acl(acl)
-    @_aclize_acl = acl
+    raise "Invalid ACL definition type: (expected: Hash, got: #{acl.class})" unless acl.is_a? Hash
+
+    if acl.has_key?(:controllers) && acl[:controllers].is_a?(Hash)
+      @_aclize_acl[:controllers] = acl[:controllers]
+    end
+
+    if acl.has_key?(:paths) && acl[:paths].is_a?(Hash)
+      @_aclize_acl[:paths] = acl[:paths]
+    end
   end
 
   def unauthorize!
     path = request.path_info
-    flash[:alert] = I18n.t("aclize.unauthorized", path: path)
+    flash.now[:alert] = I18n.t("aclize.unauthorized", path: path)
 
     if @_aclize_callback.nil?
       prepend_view_path File.expand_path("../../app/views", __FILE__)
@@ -22,6 +39,7 @@ module Aclize
 
   def self.included(base)
     base.extend ClassMethods
+    base.send :prepend, Initializer
   end
 
   module ClassMethods
@@ -37,11 +55,6 @@ module Aclize
   protected
 
   def filter_access!
-    @_aclize_acl ||= {}
-    @_aclize_acl = @_aclize_acl.nested_under_indifferent_access
-    @_aclize_acl[:controllers] ||= {}
-    @_aclize_acl[:paths]       ||= {}
-
     unauthorize! if acl_action_denied? || acl_path_denied? || !(acl_action_allowed? || acl_path_allowed?)
   end
 
@@ -98,18 +111,12 @@ module Aclize
   end
 end
 
-if defined? I18n
-  I18n.load_path += Dir[File.expand_path("../../config/locales/*.{rb,yml}", __FILE__)]
+I18n.load_path += Dir[File.expand_path("../../config/locales/*.{rb,yml}", __FILE__)]
+
+class ActionController::Base
+  include Aclize
 end
 
-if defined? ActionController::Base
-  class ActionController::Base
-    include Aclize
-  end
-end
-
-if defined? ApplicationHelper
-  module ApplicationHelper
-    # include Aclize::Helper
-  end
+module ApplicationHelper
+  include Aclize::Helper
 end
