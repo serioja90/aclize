@@ -37,7 +37,7 @@ class ApplicationController < ActionController::Base
       # setup the ACL for admin users
       define_acl({
         controllers: {
-          "*" => { allow: ["*"] }
+          "*" => { allow: ["*"] } # grant permissions to access any action of any controller
         }
       })
     else
@@ -45,7 +45,7 @@ class ApplicationController < ActionController::Base
       define_acl({
         controllers: {
           posts: {
-            allow: ["index", "show"]
+            allow: ["index", "show"] # allow to access only #index and #show actions of PostsController
           }
         }
       })
@@ -58,7 +58,7 @@ end
 
 In the example above we asume that the user passed the authentication, so that we know the type of account the user has.
 
-__N.B When you define the ACL with `define_acl(...)` you're defining it for only for the current user.__
+__N.B:__ When you define the ACL with `define_acl(...)` you're defining it only for the current user.
 
 Once you've defined the ACL, __Aclize__ will automatically manage the access control and will render the `403 Forbidden` page when the user doesn't have enough permissions to access it.
 
