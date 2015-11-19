@@ -1,0 +1,6 @@
+
+it:
+  aclize:
+    unauthorized: "Non hai sufficienti permessi per accedere a questa pagina."
+    suggestion:   "Assicurati che l'URL sia corretta e che il tuo account permetta di accedere a questa pagina."
+    contact:      "Per favore, contatta l'amministratore del sito se credi che si tratti di un errore."

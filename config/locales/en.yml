@@ -1,0 +1,6 @@
+
+en:
+  aclize:
+    unauthorized: "You don't have enough permissions to access this page"
+    suggestion:   "Make sure the address is correct and that your account type allows you to access this page."
+    contact:      "Please, contact your site administrator if you think this is a mistake."

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>403 Forbidden</title>
+  <style type="text/css">
+    body { background-color: #fff; color: #666; text-align: center; font-family: arial, sans-serif; }
+    div.dialog {
+      width: 800px;
+      padding: 0 0em;
+      margin: 0 auto 0 auto;
+    }
+
+    div.dialog p {
+      font-size: 0.9em;
+    }
+
+    div.dialog h3 {
+      font-weight: normal;
+      color: #B71C1C;
+    }
+
+    h1 {
+      font-size: 500%;
+      color: #C62828;
+      line-height: 1em;
+    }
+
+    hr {
+      border: none;
+      border-bottom: solid 1px #DDD;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>403</h1>
+  <div class="dialog">
+    <h3><%= t("aclize.unauthorized") %></h3>
+    <hr>
+    <p><%= t("aclize.suggestion") %></p>
+    <p><%= t("aclize.contact") %></p>
+  </div>
+</body>
+</html>
