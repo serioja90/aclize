@@ -2,7 +2,7 @@
 describe Aclize::Acl do
 
   it "should exist" do
-    expect(defined?(Aclize::Acl)).not_to be nil
+    expect(defined?(described_class)).not_to be nil
   end
 
   describe "#new" do
