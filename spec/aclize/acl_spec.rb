@@ -56,9 +56,8 @@ describe Aclize::Acl do
         expect(acl.roles[role]).to be_a Aclize::Acl::Role
       end
 
-      it "should call :setup on the Aclize::Acl::Role" do
-        acl.setup(role) {} # the first time it will create the role
-        expect(acl.roles[role]).to receive(:setup).once
+      it "should call :instance_eval on the Aclize::Acl::Role" do
+        expect_any_instance_of(Aclize::Acl::Role).to receive(:instance_eval).once
         acl.setup(role) {}
       end
     end

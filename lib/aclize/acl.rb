@@ -13,7 +13,7 @@ module Aclize
 
     def setup(role, &block)
       @roles[role] ||= Aclize::Acl::Role.new(role)
-      @roles[role].setup(&block)
+      @roles[role].instance_eval(&block)
     end
   end
 end
