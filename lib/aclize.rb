@@ -1,4 +1,5 @@
 require "aclize/version"
+require "aclize/acl"
 require "aclize/helper"
 require "i18n"
 require "action_controller"
