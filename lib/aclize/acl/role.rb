@@ -10,18 +10,20 @@ module Aclize
       @paths       = Aclize::Acl::PathsRegistry.new
     end
 
-    def controllers
+    def controllers(&block)
       if block_given?
-        @controllers.setup do |registry|
-          yield registry
-        end
+        @controllers.instance_eval(&block)
       else
         return @controllers
       end
     end
 
-    def setup
-      yield self
+    def paths(&block)
+      if block_given?
+        @paths.instance_eval(&block)
+      else
+        return @paths
+      end
     end
   end
 end

@@ -2,23 +2,25 @@
 module Aclize
   class Acl::ControllersRegistry
 
+    attr_reader :permitted, :denied
+
     def initialize
-      @permit = {}
-      @deny   = {}
+      @permitted = {}
+      @denied    = {}
     end
 
     # add a new permit rule to controllers registry
     def permit(name, only: nil, except: nil)
-      @permit[name.to_s] ||= []
-      @deny[name.to_s]   ||= []
+      @permitted[name.to_s] ||= []
+      @denied[name.to_s]    ||= []
 
-      if options.empty?
-        @permit[name.to_s] << "*"
-      elsif except
-        @permit[name.to_s] << "*"
-        @deny[name.to_s]   += normalize(except)
+      if except
+        @permitted[name.to_s] = ["*"]
+        @denied[name.to_s]    = normalize(except)
       elsif only
-        @permit[name.to_s] += normalize(only)
+        @permitted[name.to_s] = normalize(only)
+      else
+        @permitted[name.to_s] = "*"
       end
     end
 
@@ -29,16 +31,10 @@ module Aclize
       permit name, only: only, except: except
     end
 
-
-    def setup
-      yield self
-    end
-
-
     protected
 
     def normalize(items)
-      result = items.nil? ? [] : items.is_a?(String) ? [items] : items
+      result = items.nil? ? [] : items.is_a?(Array) ? items : [items]
       return result.map { |x| x.to_s }
     end
   end
