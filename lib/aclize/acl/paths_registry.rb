@@ -36,15 +36,10 @@ module Aclize
     def permitted?(*args)
       permitted = false
 
-      # check if any of the paths is denied and return false if so
-      @denied.each do |denied_path|
-        args.each do |path|
-          return false if path.match(/^#{denied_path}$/)
-        end
-      end
+      return false if denied?(args)
 
       # each path should have an explicit permission in order to return true
-      args.each do |path|
+      args.flatten.each do |path|
         # we assume that the path isn't permitted
         permitted = false
 
@@ -59,6 +54,18 @@ module Aclize
       end
 
       return permitted
+    end
+
+
+    # Check if any of the paths is explicitly denied
+    def denied?(*args)
+      @denied.each do |denied_path|
+        args.flatten.each do |path|
+          return true if path.match(/^#{denied_path}$/)
+        end
+      end
+
+      return false
     end
 
     protected

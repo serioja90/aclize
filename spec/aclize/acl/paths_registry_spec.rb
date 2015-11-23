@@ -318,5 +318,57 @@ describe Aclize::Acl::PathsRegistry do
         end
       end
     end
+
+    describe "#denied?" do
+      context "by default" do
+        it "should be false for 'posts' path" do
+          expect(registry.denied? 'posts').to be false
+        end
+
+        it "should be false for 'posts/1'" do
+          expect(registry.denied? 'posts/1').to be false
+        end
+      end
+
+      context "when 'posts/.*' is denied" do
+        before do
+          registry.deny 'posts/.*'
+        end
+
+        it "should be false for 'posts' path" do
+          expect(registry.denied? 'posts').to be false
+        end
+
+        it "should be true for 'posts/1'" do
+          expect(registry.denied? 'posts/1').to be true
+        end
+
+        it "should be true for 'posts/something'" do
+          expect(registry.denied? 'posts/something').to be true
+        end
+      end
+
+      context "when 'posts/(\d+)?/.*' is denied" do
+        before do
+          registry.deny 'posts/(\d+)?/.*'
+        end
+
+        it "should be false for 'posts' path" do
+          expect(registry.denied? 'posts').to be false
+        end
+
+        it "should be false for 'posts/1'" do
+          expect(registry.denied? 'posts/1').to be false
+        end
+
+        it "should be false for 'posts/something'" do
+          expect(registry.denied? 'posts/something').to be false
+        end
+
+        it "should be true for 'posts/1/something'" do
+          expect(registry.denied? 'posts/1/something').to be true
+        end
+      end
+    end
   end
 end
