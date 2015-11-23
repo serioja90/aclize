@@ -33,32 +33,34 @@ class ApplicationController < ActionController::Base
   protected
 
   def setup_acl
-    if current_user.admin?
-      # setup the ACL for admin users
-      define_acl({
-        controllers: {
-          "*" => { allow: ["*"] } # grant permissions to access any action of any controller
-        }
-      })
-    else
-      # setup the ACL for other users
-      define_acl({
-        controllers: {
-          posts: {
-            allow: ["index", "show"] # allow to access only #index and #show actions of PostsController
-          }
-        }
-      })
+
+    # define ACL for :admin
+    acl_for :admin do
+      controllers do
+        permit "*" # permit to access any action of any controller
+      end
     end
 
-    filter_access!
+    # define acl for :user
+    acl_for :user do
+      controllers do
+        permit :posts, only: [:index, :show]                  # users can access only :index and :show actions of :posts controller
+        permit :comments, except: [:edit, :update, :destroy]  # can also access all the actions of :comments controller, except for :edit, :update and :destroy actions
+      end
+
+      paths do
+        permit "path/[a-c]", "path/[0-9]+"    # permit :user to access "path/a", "path/b", "path/c" and "path/<a digit>"
+        deny   "path/b"                       # deny the access to "path/b"
+      end
+    end
+
+    set_current_role(current_user.role) # assuming that current_user is returning an object representing the current user
+    filter_access! # apply the ACL for the current user
   end
 end
 ```
 
-In the example above we asume that the user passed the authentication, so that we know the type of account the user has.
-
-__N.B:__ When you define the ACL with `define_acl(...)` you're defining it only for the current user.
+__IMPORTANT:__ you have to tell __Aclize__ what is the role of the current user by calling `set_current_role(<ROLE>)` method, because if you don't specify any role, the default role `:all` will be used.
 
 Once you've defined the ACL, __Aclize__ will automatically manage the access control and will render the `403 Forbidden` page when the user doesn't have enough permissions to access it.
 
