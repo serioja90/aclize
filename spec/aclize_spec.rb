@@ -106,8 +106,8 @@ describe Aclize do
 
         context "when controller is :comments" do
           before do
-            allow(request).to receive(:path_info).and_return "comments/index"
-            allow(instance).to receive(:controller_name).and_return "comments"
+            allow(request).to receive(:path).and_return "comments/index"
+            allow(instance).to receive(:controller_path).and_return "comments"
             allow(instance).to receive(:action_name).and_return "index"
           end
 
@@ -118,8 +118,8 @@ describe Aclize do
 
         context "when controller is :posts" do
           before do
-            allow(request).to receive(:path_info).and_return "posts/index"
-            allow(instance).to receive(:controller_name).and_return "posts"
+            allow(request).to receive(:path).and_return "posts/index"
+            allow(instance).to receive(:controller_path).and_return "posts"
             allow(instance).to receive(:action_name).and_return "index"
           end
 
@@ -130,13 +130,54 @@ describe Aclize do
 
         context "when controller is :posts and action is :new" do
           before do
-            allow(request).to receive(:path_info).and_return "posts/new"
-            allow(instance).to receive(:controller_name).and_return "posts"
+            allow(request).to receive(:path).and_return "posts/new"
+            allow(instance).to receive(:controller_path).and_return "posts"
             allow(instance).to receive(:action_name).and_return "new"
           end
 
           it "should call call :unauthorize!" do
-            expect(instance).not_to receive(:unauthorize!).once
+            expect(instance).to receive(:unauthorize!).once
+          end
+        end
+
+        context "when relative_url_root is specified" do
+          before do
+            allow(instance).to receive(:relative_url_root).and_return "my_app/"
+            allow(request).to receive(:path).and_return instance.relative_url_root + "posts/index"
+            allow(instance).to receive(:controller_path).and_return "posts"
+            allow(instance).to receive(:action_name).and_return "index"
+          end
+
+          it "should NOT call :unauthorize!" do
+            expect(instance).not_to receive(:unauthorize!)
+          end
+        end
+
+        context "when within mounted engine" do
+          before do
+            allow(request).to receive(:path).and_return "my_engine/posts/index"
+            allow(instance).to receive(:controller_path).and_return "my_engine/posts"
+            allow(instance).to receive(:action_name).and_return "index"
+          end
+
+          it "should call call :unauthorize!" do
+            expect(instance).to receive(:unauthorize!).once
+          end
+
+          context "and :index action is allowed for :posts" do
+            before do
+              instance.instance_eval do
+                acl_for :user do
+                  controllers do
+                    permit "my_engine/posts", only: [:index]
+                  end
+                end
+              end
+            end
+
+            it "should NOT call :unauthorize!" do
+              expect(instance).not_to receive(:unauthorize!)
+            end
           end
         end
 

@@ -64,13 +64,14 @@ module Aclize
   # apply the ACL for a specific role and unauthorize if the user is not permitted
   # to access controller action or the path
   def treat_as(role)
-    acl = @_aclize_acl.get_acl_for(role)
+    acl  = @_aclize_acl.get_acl_for(role)
+    path = request.path.gsub(/^#{relative_url_root}/, '')
     unauthorize! unless acl
 
-    if acl.controllers.permitted?(controller_name, action_name)
-      unauthorize! if acl.paths.denied?(request.path_info)
+    if acl.controllers.permitted?(controller_path, action_name)
+      unauthorize! if acl.paths.denied?(path)
     else
-      unauthorize! unless acl.paths.permitted?(request.path_info)
+      unauthorize! unless acl.paths.permitted?(path)
     end
   end
 
@@ -84,7 +85,7 @@ module Aclize
   # In no callbacks were defined for unauthorized access, Aclize will render a
   # default 403 Forbidden page. Otherwise, the control will be passed to the callback.
   def unauthorize!
-    path = request.path_info
+    path = request.path
     flash.now[:alert] = I18n.t("aclize.unauthorized", path: path)
 
     if @_aclize_callback.nil?
