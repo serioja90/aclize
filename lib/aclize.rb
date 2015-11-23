@@ -32,30 +32,52 @@ module Aclize
   # The Initializer module will be used to initialize instance variables and to setup defaults.
   module Initializer
     def initialize
-      @_aclize_acl = {controllers: {}, paths: {} }.nested_under_indifferent_access
+      @_aclize_acl ||= Aclize::Acl.new
+      @_aclize_current_role = nil
       super
     end
   end
 
   protected
 
-  # Returns the ACL definition as a Hash
+  # Returns the ACL definition
   def get_acl_definition
     return @_aclize_acl
   end
 
-  # Defines the structure of ACL for the current user
-  # TODO: implement a better or an alternative way for ACL definition
-  def define_acl(acl)
-    raise "Invalid ACL definition type: (expected: Hash, got: #{acl.class})" unless acl.is_a? Hash
 
-    if acl.has_key?(:controllers) && acl[:controllers].is_a?(Hash)
-      @_aclize_acl[:controllers] = acl[:controllers]
-    end
+  def set_current_role(role)
+    @_aclize_current_role = role
+  end
 
-    if acl.has_key?(:paths) && acl[:paths].is_a?(Hash)
-      @_aclize_acl[:paths] = acl[:paths]
+  def get_current_role
+    return @_aclize_current_role || :all
+  end
+
+
+  # setup the ACL for a role
+  def acl_for(role = :all, &block)
+    @_aclize_acl.setup(role, &block)
+  end
+
+
+  # apply the ACL for a specific role and unauthorize if the user is not permitted
+  # to access controller action or the path
+  def treat_as(role)
+    acl = @_aclize_acl.get_acl_for(role)
+    unauthorize! unless acl
+
+    if acl.controllers.permitted?(controller_name, action_name)
+      unauthorize! if acl.paths.denied?(request.path_info)
+    else
+      unauthorize! unless acl.paths.permitted?(request.path_info)
     end
+  end
+
+
+  # use the current_role value to apply ACL
+  def filter_access!
+    treat_as get_current_role
   end
 
 
@@ -74,59 +96,6 @@ module Aclize
       @_aclize_callback.call(path)
     end
   end
-
-
-  # Check if the current user have enough permissions to access the current controller/path
-  def filter_access!
-    unauthorize! if acl_action_denied? || acl_path_denied? || !(acl_action_allowed? || acl_path_allowed?)
-  end
-
-
-  # check if the current action is denied
-  def acl_action_denied?
-    actions = (@_aclize_acl[:controllers][controller_name] || @_aclize_acl[:controllers]["*"] || {})[:deny] || []
-    actions.map!{|action| action.to_s }
-
-    return actions.include?("*") || actions.include?(action_name)
-  end
-
-
-  # check if the current action is allowed
-  def acl_action_allowed?
-    actions = (@_aclize_acl[:controllers][controller_name] || @_aclize_acl[:controllers]["*"] || {})[:allow] || []
-    actions.map!{|action| action.to_s }
-
-    return actions.include?("*") || actions.include?(action_name)
-  end
-
-
-  # check if the current path is denied
-  def acl_path_denied?
-    paths  = @_aclize_acl[:paths][:deny] || []
-    denied = false
-
-    paths.each do |path|
-      denied ||= !request.path_info.match(Regexp.new("^#{path}$")).nil?
-      break if denied
-    end
-
-    return denied
-  end
-
-
-  # check if the current path is allowed
-  def acl_path_allowed?
-    paths  = @_aclize_acl[:paths][:allow] || []
-    allowed = false
-
-    paths.each do |path|
-      allowed ||= !request.path_info.match(Regexp.new("^#{path}$")).nil?
-      break if allowed
-    end
-
-    return allowed
-  end
-
 
   # register a callback to call when the user is not authorized to access the page
   def register_callback(&block)
