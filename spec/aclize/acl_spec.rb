@@ -47,6 +47,23 @@ describe Aclize::Acl do
       end
     end
 
+    describe "#get_acl_for" do
+      let(:role_name) { :user }
+      subject(:role)  { acl.get_acl_for(role_name) }
+
+      context "when role exists" do
+        before do
+          acl.setup(role_name){}
+        end
+
+        it { is_expected.to eq(acl.roles[role_name]) }
+      end
+
+      context "when role doesn't exist" do
+        it { is_expected.to eq(acl.roles[:all]) }
+      end
+    end
+
     describe "#setup" do
       let(:role) { :admin }
 
