@@ -20,6 +20,8 @@ module Aclize
       @permitted[controller] ||= []
       @denied[controller]    ||= []
 
+      raise ArgumentError.new("#permit cannot accept both :only and :except. At most one of them can be specified!") if only && except
+
       if except
         @permitted[controller] = ["*"]
         @denied[controller]    = normalize(except)
@@ -84,7 +86,7 @@ module Aclize
     end
 
     def normalize(items)
-      result = items.nil? ? [] : items.is_a?(Array) ? items : [items]
+      result = items.nil? ? [] : items.is_a?(Array) ? items.flatten : [items]
       return result.map { |x| x.to_s }
     end
   end

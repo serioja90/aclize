@@ -133,6 +133,12 @@ describe Aclize::Acl::ControllersRegistry do
       context "by default" do
         it "should be false for :index action of :posts controller" do
           expect(registry.permitted? :posts, :index).to be false
+          expect(registry.permitted? :posts, [:index]).to be false
+        end
+
+        it "should be false for multiple actions of :posts controller" do
+          expect(registry.permitted? :posts, :show, :new, :edit).to be false
+          expect(registry.permitted? :posts, [:show, :new, :edit]).to be false
         end
 
         it "should be false for any controller" do
@@ -147,18 +153,26 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :posts controller" do
           expect(registry.permitted? :posts, :index).to be true
+          expect(registry.permitted? :posts, [:index]).to be true
         end
 
         it "should be true for :posts controller" do
           expect(registry.permitted? :posts).to be true
         end
 
+        it "should be false for [:index, :show] actions of :posts controller" do
+          expect(registry.permitted? :posts, :index, :show).to be false
+          expect(registry.permitted? :posts, [:index, :show]).to be false
+        end
+
         it "should be false for :show action of :posts controller" do
           expect(registry.permitted? :posts, :show).to be false
+          expect(registry.permitted? :posts, [:show]).to be false
         end
 
         it "should be false for :index action of :comments controller" do
           expect(registry.permitted? :comments, :index).to be false
+          expect(registry.permitted? :comments, [:index]).to be false
         end
 
         it "should be false for :comments controller" do
@@ -177,10 +191,17 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :posts controller" do
           expect(registry.permitted? :posts, :index).to be true
+          expect(registry.permitted? :posts, [:index]).to be true
         end
 
         it "should be true for :show action of :posts controller" do
           expect(registry.permitted? :posts, :show).to be true
+          expect(registry.permitted? :posts, [:show]).to be true
+        end
+
+        it "should be true for [:index, :show, :new] actions of :posts controller" do
+          expect(registry.permitted? :posts, :index, :show, :new).to be true
+          expect(registry.permitted? :posts, [:index, :show, :new]).to be true
         end
 
         it "should be false for :comments controller" do
@@ -189,6 +210,7 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be false for :index action of :comments controller" do
           expect(registry.permitted? :comments, :index).to be false
+          expect(registry.permitted? :comments, [:index]).to be false
         end
       end
 
@@ -203,14 +225,27 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :posts controller" do
           expect(registry.permitted? :posts, :index).to be true
+          expect(registry.permitted? :posts, [:index]).to be true
         end
 
         it "should be true for :show action of :posts controller" do
           expect(registry.permitted? :posts, :show).to be true
+          expect(registry.permitted? :posts, [:show]).to be true
+        end
+
+        it "should be true for [:index, :show, :new] actions of :posts controller" do
+          expect(registry.permitted? :posts, :index, :show, :new).to be true
+          expect(registry.permitted? :posts, [:index, :show, :new]).to be true
+        end
+
+        it "should be false for [:index, :show, :destroy] actions of :posts controller" do
+          expect(registry.permitted? :posts, :index, :show, :destroy).to be false
+          expect(registry.permitted? :posts, [:index, :show, :destroy]).to be false
         end
 
         it "should be false for :destroy action of :posts controller" do
           expect(registry.permitted? :posts, :destroy).to be false
+          expect(registry.permitted? :posts, [:destroy]).to be false
         end
 
         it "should be false for :comments controller" do
@@ -219,6 +254,7 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be false for :index action of :comments controller" do
           expect(registry.permitted? :comments, :index).to be false
+          expect(registry.permitted? :comments, [:index]).to be false
         end
       end
 
@@ -233,10 +269,17 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :posts controller" do
           expect(registry.permitted? :posts, :index).to be true
+          expect(registry.permitted? :posts, [:index]).to be true
+        end
+
+        it "should be false for [:index, :show] actions of :posts controller" do
+          expect(registry.permitted? :posts, :index, :show).to be false
+          expect(registry.permitted? :posts, [:index, :show]).to be false
         end
 
         it "should be false for :show action of :posts controller" do
           expect(registry.permitted? :posts, :show).to be false
+          expect(registry.permitted? :posts, [:show]).to be false
         end
 
         it "should be true for :comments controller" do
@@ -245,10 +288,12 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :comments controller" do
           expect(registry.permitted? :comments, :index).to be true
+          expect(registry.permitted? :comments, [:index]).to be true
         end
 
         it "should be false for :show action of :comments controller" do
           expect(registry.permitted? :comments, :show).to be false
+          expect(registry.permitted? :comments, [:show]).to be false
         end
       end
 
@@ -263,10 +308,17 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :posts controller" do
           expect(registry.permitted? :posts, :index).to be true
+          expect(registry.permitted? :posts, [:index]).to be true
         end
 
         it "should be true for :show action of :posts controller" do
           expect(registry.permitted? :posts, :show).to be true
+          expect(registry.permitted? :posts, [:show]).to be true
+        end
+
+        it "should be true for [:index, :show, :new] actions of :posts controller" do
+          expect(registry.permitted? :posts, :index, :show, :new).to be true
+          expect(registry.permitted? :posts, [:index, :show, :new]).to be true
         end
 
         it "should be true for :comments controller" do
@@ -275,10 +327,12 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :comments controller" do
           expect(registry.permitted? :comments, :index).to be true
+          expect(registry.permitted? :comments, [:index]).to be true
         end
 
         it "should be true for :show action of :comments controller" do
           expect(registry.permitted? :comments, :show).to be true
+          expect(registry.permitted? :comments, [:show]).to be true
         end
       end
 
@@ -293,14 +347,27 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :posts controller" do
           expect(registry.permitted? :posts, :index).to be true
+          expect(registry.permitted? :posts, [:index]).to be true
         end
 
         it "should be true for :show action of :posts controller" do
           expect(registry.permitted? :posts, :show).to be true
+          expect(registry.permitted? :posts, [:show]).to be true
+        end
+
+        it "should be true for [:index, :show, :new] actions of :posts controller" do
+          expect(registry.permitted? :posts, :index, :show, :new).to be true
+          expect(registry.permitted? :posts, [:index, :show, :new]).to be true
+        end
+
+        it "should be false for [:index, :show, :destroy] actions of :posts controller" do
+          expect(registry.permitted? :posts, :index, :show, :destroy).to be false
+          expect(registry.permitted? :posts, [:index, :show, :destroy]).to be false
         end
 
         it "should be false for :destroy action of :posts controller" do
           expect(registry.permitted? :posts, :destroy).to be false
+          expect(registry.permitted? :posts, [:destroy]).to be false
         end
 
         it "should be true for :comments controller" do
@@ -309,14 +376,17 @@ describe Aclize::Acl::ControllersRegistry do
 
         it "should be true for :index action of :comments controller" do
           expect(registry.permitted? :comments, :index).to be true
+          expect(registry.permitted? :comments, [:index]).to be true
         end
 
         it "should be true for :show action of :comments controller" do
           expect(registry.permitted? :comments, :show).to be true
+          expect(registry.permitted? :comments, [:show]).to be true
         end
 
         it "should be false for :destroy action of :comments controller" do
           expect(registry.permitted? :comments, :destroy).to be false
+          expect(registry.permitted? :comments, [:destroy]).to be false
         end
       end
     end
