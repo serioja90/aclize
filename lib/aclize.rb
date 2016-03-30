@@ -94,7 +94,7 @@ module Aclize
         format.html { render 'aclize/403', disposition: "inline", status: 403, layout: false }
       end
     else
-      @_aclize_callback.call(path)
+      self.instance_eval(&@_aclize_callback)
     end
   end
 
